@@ -1,0 +1,28 @@
+1TODO:
+    param.py
+        --batch-size=16
+        --input_size=23+2
+        --output_size=input_size-22
+        --idx_0d,idx_90d.....
+        --model_name
+        --model_conv_depth
+        --model_filter_nums
+        --model_learning_rate
+        --logfile_dir = '/home/dell/Users/Samuel/Projects/epinet/epinet_checkpoints/' + model_name + 'train.txt'
+        --is_train = True
+        --checkpoint_filename = ''
+        --steps_per_epoch = 10000
+	data_process.py
+	    --read_data(dir_list, idxs)
+	        return raw_data_0d(n_scence,9,512,512,3), raw_data_90d.... , raw_label(n_scence,512,512)
+	    --stack_imgs(raw_data)
+	        return stacked_data_0d(n_scence, 512, 512, 9), stack_data_90d....
+        --generate_train(raw_data...raw_label)
+            "random gray, scale,"
+            return traindata_batch_90d(batch_size,input_size,input_size,9)... train_label(batch_size,input_size,input_size)
+        --aug_train(train_batch_...,train_label)
+            "rotation flipping gamma"
+            return train_batch_..., train_label
+    train.py
+        --epi_generator()
+            yield train_batch..., train_label

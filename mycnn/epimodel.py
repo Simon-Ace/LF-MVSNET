@@ -3,6 +3,7 @@ from keras.optimizers import RMSprop
 from keras.models import Model, Sequential
 import param
 from keras.utils import plot_model
+from keras import backend as K
 
 
 # 4 stream input sequence
@@ -181,6 +182,17 @@ def get_mvs_model(feature_filters_num, feature_depth, cost_filter_depth, learnin
         X = layersP1_multistream(input_shape, feature_filters_num)(input_list[i])
         feature_list.append(X)
 
+    # 孪生原始网络
+    # layer1_seq = layersP1_multistream(input_shape, feature_filters_num)
+    # for i in range(input_pic_num):
+    #     X = layer1_seq(input_list[i])
+    #     feature_list.append(X)
+
+    # TODO: cost volume构建
+    disp = 3
+    cost_volume = K.zeros(shape=(X.shape[0], X.shape[1], disp, X.shape[2], X.shape[3]))
+
+
     merged = concatenate(feature_list, name='merged')
 
 
@@ -203,7 +215,7 @@ def get_mvs_model(feature_filters_num, feature_depth, cost_filter_depth, learnin
 
 
 
-    #TODO: cost volume构建
+
 
     #TODO: mean cost volume
 

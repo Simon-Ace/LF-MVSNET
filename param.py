@@ -18,10 +18,10 @@ param.batch_size = 16
 param.input_size = 25             #23+2   # 经过一堆卷积之后23x23 -> 1x1，改成：25x25 -> 3x3
 param.model_conv_depth = 7
 # param.output_size = param.input_size - 22
-param.output_size = param.input_size - (param.model_conv_depth + 1) * 2 - 6    # 有几个valid的conv，就得减几
+param.output_size = param.input_size - (param.model_conv_depth + 1) * 2 - 6    # 有几个valid的conv，就得减几  -6是因为把前面分叉6个valid卷积层加进来了
 param.model_filter_nums = 70
 param.model_learning_rate = 1e-4  #1e-4
-param.steps_per_epoch = 5000
+param.steps_per_epoch = 1000
 param.worker_num = 2 # ???
 
 # NEW
@@ -52,10 +52,11 @@ param.trainset_dirs = [
 ]
 
 # for output
-param.logfile_dir = 'out/' + param.model_name + '_train.txt'
-param.iter_dir = 'out/'+param.model_name +'/iteration/'
-param.checkpoint_dir = 'out/'+param.model_name +'/checkpoints/'
-param.prediction_dir = 'out/'+param.model_name +'/prediction/'
+out_root_dir = 'out_new/'
+param.logfile_dir = out_root_dir + param.model_name + '_train.txt'
+param.iter_dir = out_root_dir + param.model_name +'/iteration/'
+param.checkpoint_dir = out_root_dir + param.model_name +'/checkpoints/'
+param.prediction_dir = out_root_dir + param.model_name +'/prediction/'
 
 
 

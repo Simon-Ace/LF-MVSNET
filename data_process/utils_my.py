@@ -201,6 +201,8 @@ def generate_any_num_train_data(raw_data_list, raw_label):
 
 if __name__ == '__main__':
     raw_data_list, raw_label = read_any_num_data(param.trainset_dirs, param.input_img_size, param.idx_5pic)
+
+    #write_pfm(raw_label[:,:,0], './123.pfm')
     '''
     vis2 = np.zeros(shape=(512, 512, 3), dtype=np.uint8)
     vis2[:, :, :] = raw_data_list[0][:, :, :, 0]

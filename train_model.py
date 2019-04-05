@@ -61,7 +61,7 @@ def mvs_generator(raw_data_list, raw_label):
 if __name__ == '__main__':
     # GPU setting
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     # dir check
     if not os.path.exists(param.iter_dir):

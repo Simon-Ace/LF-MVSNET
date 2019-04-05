@@ -43,6 +43,9 @@ remind:
 每次改完网络结构，有两个地方要改：  
 parm.py中param.output_size，根目录utils.py中pad_width
 
+- [ ] 查问题!!! 是数据生成的问题??【为啥loss降到0.03，mse和bad pixel起飞？？】 mvs_generator有问题么?
+- [ ] cost volume 还没写。。
+
 ★ Keras中有Dense函数，可以直接用？
 
 

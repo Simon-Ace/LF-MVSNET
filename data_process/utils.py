@@ -1,6 +1,6 @@
 from param import *
 import numpy as np
-from .func_pfm import *
+from data_process.func_pfm import *
 import imageio
 
 
@@ -8,11 +8,11 @@ def read_data(dirs, idx_90d, idx_0d, idx_45d, idx_m45d, img_size):
     """
     read raw lf images
     return:
-        raw_data_0d(n_scences,512,512,3,9) ->  num_scences, height, width, channel,9 images,
+        raw_data_0d(512,512,3,9,n_scences) ->  height, width, channel, 9 images, num_scences
         raw_data_90d
         raw_data_45d
         raw_data_,45d
-        raw_label(n_scences,512,512)
+        raw_label(512,512,n_scences)
     """
     raw_data_90d = np.zeros(shape=(img_size, img_size, 3, 9, len(dirs)), dtype=np.float32)
     raw_data_0d = np.zeros(shape=(img_size, img_size, 3, 9, len(dirs)), dtype=np.float32)
@@ -83,7 +83,7 @@ def random_gray_resized_crop(w_start, h_start, scale, scence_id, data, R, G, B):
     :param R: float
     :param G: float
     :param B: float
-    :return: croped: ndarray(input_size,input_size,9)
+    :return: croped: ndarray(input_size,input_size,9) (25,25,9)
     """
     croped = data[w_start:w_start + scale * param.input_size:scale, h_start:h_start + scale * param.input_size:scale, 0,
              :, scence_id] * R \
@@ -119,7 +119,7 @@ def generate_train_data(raw_data_90d,raw_data_0d, raw_data_45d, raw_data_m45d, r
     :param raw_data_90d:
     :param raw_data_45d:
     :param raw_data_m45d:
-    :param raw_label: ndarray(512,512,9,n_scences)
+    :param raw_label: ndarray(512,512,n_scences)
     :return: train_batch_0d(batch_size,23~,23~,9)
             train_batch_label(batch_size,1~,1~)
     """
@@ -260,3 +260,18 @@ def aug_operation(train_batch_90d, train_batch_0d, train_batch_45d, train_batch_
                 np.rot90(train_batch_label[batch_i, :, :], 3, (0, 1)))
 
     return train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label
+
+
+if __name__ == '__main__':
+    raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_label = read_data(param.trainset_dirs, param.idx_90d,
+                                                                                  param.idx_0d, param.idx_45d,
+                                                                                  param.idx_m45d, param.input_img_size)
+
+    # 512x512x3x9 -> 512x512x9
+    train512_data_90d, train512_data_0d, train512_data_45d, train512_data_m45d = stack_data(raw_data_90d, raw_data_0d,
+                                                                                            raw_data_45d, raw_data_m45d)
+
+    train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = generate_train_data(
+        raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_label)
+    
+    print(1)

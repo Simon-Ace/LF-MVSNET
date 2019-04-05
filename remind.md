@@ -38,6 +38,11 @@ StereoNet前面也是ResNet怎么做的？？【加的padding，类似same】
 明天先改回去，把FeatureExtraction后面还是直接返回输出结果。  
 把前面分叉的model打印看一下
 
+**20190405**  
+remind:  
+每次改完网络结构，有两个地方要改：  
+parm.py中param.output_size，根目录utils.py中pad_width
+
 ★ Keras中有Dense函数，可以直接用？
 
 

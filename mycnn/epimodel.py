@@ -131,6 +131,21 @@ def FeatureExtraction(input_shape, filters_count, feature_depth):
         X = residual_block(X, filters_count)
     return Model(inputs=input, outputs=X)
 
+
+
+def FeatureExtraction_ori(input_shape, filters_count, feature_depth):
+    """
+
+    :param input_shape:
+    :param filters_count:
+    :param feature_depth:
+    :return:
+    """
+    pass
+
+
+
+
 def get_mvs_model(feature_filters_num, feature_depth, cost_filter_depth, learning_rate, input_pic_num, input_shape=(512, 512, 1)):
     '''
     :param feature_filters_num: 特征提取部分卷积核数量
@@ -152,12 +167,22 @@ def get_mvs_model(feature_filters_num, feature_depth, cost_filter_depth, learnin
 
     #TODO: Siamese Network
     feature_list = []
+
+    '''
+    # ResBlock 孪生网络
     fea_ext_model = FeatureExtraction(input_shape, feature_filters_num, feature_depth)
     for i in range(input_pic_num):
         X = fea_ext_model(input_list[i])
         feature_list.append(X)
+    '''
+
+    # 非孪生原始网络
+    for i in range(input_pic_num):
+        X = layersP1_multistream(input_shape, feature_filters_num)(input_list[i])
+        feature_list.append(X)
 
     merged = concatenate(feature_list, name='merged')
+
 
     # 瞎写的:把原来的抄过来
     merged = layersP2_merged(input_shape=(input_shape[0], input_shape[1], int(feature_filters_num) * 5),

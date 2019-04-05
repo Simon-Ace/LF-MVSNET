@@ -8,8 +8,10 @@ def get_diff_badpixel(train_output,train_label,iter,dir_save):
     train_label = np.transpose(train_label,(2,0,1))
     train_output = np.squeeze(train_output)
     train_label482 = train_label[:,15:-15, 15:-15]
-    #推出来的公式：512 - 2(model_conv_depth+1) - 2pad = 482
-    pad_width = 14 - param.model_conv_depth
+    #推出来的公式：512 - 2*(model_conv_depth+1) - 2pad = 482
+    # (512 - 482 - 2*(model_fea_depth + model_conv_depth + 1)) / 2
+    # pad_width = 14 - param.model_conv_depth
+    pad_width = (512 - 482 - 2*(3 + param.model_conv_depth + 1)) // 2
     train_output482 = train_output[:, pad_width:-pad_width, pad_width:-pad_width]
 
     train_diff = np.abs(train_output482 - train_label482)

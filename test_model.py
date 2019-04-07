@@ -8,13 +8,14 @@ import re
 
 '''GPU setting'''
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 subdirs = os.listdir(LF_test_dir)
 
 
 # load model
-model = get_model(input_shape=(512, 512, 9), filters_count=70, conv_depth=7, learning_rate=1e-4)
+# model = get_model(input_shape=(512, 512, 9), filters_count=70, conv_depth=7, learning_rate=1e-4)
+model = get_model(input_shape=(512, 512, param.each_row_pic_num), filters_count=70, conv_depth=7, learning_rate=1e-4)
 
 # load the latest weights
 ckps = os.listdir(param.checkpoint_dir)

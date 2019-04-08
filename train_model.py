@@ -58,7 +58,13 @@ def epi_generator(raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_la
 if __name__ == '__main__':
     # GPU setting
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+    from keras.backend.tensorflow_backend import set_session
+    import tensorflow as tf
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    set_session(tf.Session(config=config))
 
     # dir check
     if not os.path.exists(param.iter_dir):
@@ -114,7 +120,7 @@ if __name__ == '__main__':
     #                          embeddings_metadata=None)
 
     while 1:
-        model.fit_generator(mygenerator, steps_per_epoch=param.steps_per_epoch, epochs=initial_epoch + 1,
+        history = model.fit_generator(mygenerator, steps_per_epoch=param.steps_per_epoch, epochs=initial_epoch + 1,
                             initial_epoch=initial_epoch,
                             verbose=1, workers=param.worker_num, max_queue_size=10, use_multiprocessing=False)
         initial_epoch += 1
@@ -137,8 +143,8 @@ if __name__ == '__main__':
         # logfile
         with open(param.logfile_dir, 'a') as f:
             f.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + \
-                    'iter%04d_mse%.3f_bp%.2f.hdf5' % (
-                    initial_epoch, training_mean_squared_error_x100, training_bad_pixel_ratio) \
+                    ' iter%04d_mse-%5.3f_bp-%4.2f_trainLoss-%.4f' % (
+                    initial_epoch, training_mean_squared_error_x100, training_bad_pixel_ratio, history.history['loss'][0]) \
                     + '\n')
 
         if (training_bad_pixel_ratio < best_result):

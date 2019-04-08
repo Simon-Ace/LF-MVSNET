@@ -1,6 +1,6 @@
 from param import *
 import numpy as np
-from .func_pfm import *
+from data_process.func_pfm import *
 import imageio
 
 
@@ -157,7 +157,8 @@ def generate_train_data(raw_data_90d,raw_data_0d, raw_data_45d, raw_data_m45d, r
             crop_0d = random_gray_resized_crop(x_start, y_start, scale, scence_id, raw_data_0d, R, G, B)
 
             # sum_diff
-            center_img = (1 / 255) * crop_0d[:, :, 4]
+            # center_img = (1 / 255) * crop_0d[:, :, 4]
+            center_img = (1 / 255) * crop_0d[:, :, param.each_row_pic_num//2]
             sum_diff = np.sum(
                 np.abs(center_img - np.squeeze(center_img[int(0.5 * param.input_size), int(0.5 * param.input_size)])))
 
@@ -175,7 +176,6 @@ def generate_train_data(raw_data_90d,raw_data_0d, raw_data_45d, raw_data_m45d, r
                 train_batch_45d[:, :, :, i] = crop_45d
                 train_batch_m45d[:, :, :, i] = crop_m45d
                 train_batch_label[:, :, i] = crop_label
-
                 break
 
     train_batch_0d = np.transpose(train_batch_0d, (3, 0, 1, 2)) / 255
@@ -260,3 +260,12 @@ def aug_operation(train_batch_90d, train_batch_0d, train_batch_45d, train_batch_
                 np.rot90(train_batch_label[batch_i, :, :], 3, (0, 1)))
 
     return train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label
+
+
+if __name__ == '__main__':
+    raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_label = read_data(param.trainset_dirs, param.idx_90d,
+                                                                                  param.idx_0d, param.idx_45d,
+                                                                                  param.idx_m45d, param.input_img_size)
+
+    train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = generate_train_data(
+        raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_label)

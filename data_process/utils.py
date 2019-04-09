@@ -70,7 +70,13 @@ def stack_data(raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d):
     stack_data_90d = np.transpose(stack_data_90d, (3, 0, 1, 2))
     stack_data_45d = np.transpose(stack_data_45d, (3, 0, 1, 2))
     stack_data_m45d = np.transpose(stack_data_m45d, (3, 0, 1, 2))
-    return stack_data_90d, stack_data_0d, stack_data_45d, stack_data_m45d
+
+    # cost volume
+    stack_data_disp_0d, stack_data_disp_90d, stack_data_disp_45d, stack_data_disp_m45d = \
+        build_cost_volume(stack_data_0d, stack_data_90d, stack_data_45d, stack_data_m45d)
+
+    # return stack_data_90d, stack_data_0d, stack_data_45d, stack_data_m45d
+    return stack_data_disp_90d, stack_data_disp_0d, stack_data_disp_45d, stack_data_disp_m45d
 
 
 def random_gray_resized_crop(w_start, h_start, scale, scence_id, data, R, G, B):
@@ -110,6 +116,56 @@ def random_resized_crop(w_start, h_start, scale, scence_id, data):
     croped = data[w_start + scale * pad:w_start + scale * pad + scale * param.output_size:scale,
              h_start + scale * pad:h_start + scale * pad + scale * param.output_size:scale, scence_id]
     return croped / scale
+
+# TODO: 构建的时候要加shape
+def build_cost_volume(train_batch_0d, train_batch_90d, train_batch_45d, train_batch_m45d):
+    # TODO: 构架cost volume
+    '''
+    0d  -> 4 40      90d -> 76 40
+    45d -> 36 40    m45d -> 44 40
+    '''
+    train_batch_disp_0d = np.zeros((train_batch_0d.shape[0], train_batch_0d.shape[1], train_batch_0d.shape[2], param.disp * 2 + 1),
+                                   dtype=np.float32)
+    train_batch_disp_90d = np.zeros((train_batch_90d.shape[0], train_batch_90d.shape[1], train_batch_90d.shape[2], param.disp * 2 + 1),
+                                    dtype=np.float32)
+    train_batch_disp_45d = np.zeros((train_batch_45d.shape[0], train_batch_45d.shape[1], train_batch_45d.shape[2], param.disp * 2 + 1),
+                                    dtype=np.float32)
+    train_batch_disp_m45d = np.zeros((train_batch_m45d.shape[0], train_batch_m45d.shape[1], train_batch_m45d.shape[2], param.disp * 2 + 1),
+                                     dtype=np.float32)
+
+    # #测试图像分割
+    # vis1 = np.zeros(shape=(param.input_size, param.input_size, 1), dtype=np.float32)
+    # vis2 = np.zeros(shape=(param.input_size, param.input_size, 1), dtype=np.float32)
+    # vis1[:-15, :, 0] = train_batch_0d[0, :-15, :, 0]
+    # vis2[:, :, 0] = train_batch_0d[0, :, :, 0]
+    # imageio.imwrite(r'1.jpg', vis1)
+    # imageio.imwrite(r'2.jpg', vis2)
+
+    # 先Hight后width
+    for k in range(-param.disp, param.disp + 1):
+        if k < 0:
+            train_batch_disp_0d[:, :k, :, k + param.disp] = train_batch_0d[:, :k, :, 0] - train_batch_0d[:, -k:, :, 1]
+            train_batch_disp_90d[:, :k, :, k + param.disp] = train_batch_90d[:, :k, :, 0] - train_batch_90d[:, -k:, :,
+                                                                                            1]
+            train_batch_disp_45d[:, :, :k, k + param.disp] = train_batch_45d[:, :, :k, 0] - train_batch_45d[:, :, -k:,
+                                                                                            1]
+            train_batch_disp_m45d[:, :, :k, k + param.disp] = train_batch_m45d[:, :, :k, 0] - train_batch_m45d[:, :,
+                                                                                              -k:, 1]
+        elif k > 0:
+            train_batch_disp_0d[:, k:, :, k + param.disp] = train_batch_0d[:, k:, :, 0] - train_batch_0d[:, :-k, :, 1]
+            train_batch_disp_90d[:, k:, :, k + param.disp] = train_batch_90d[:, k:, :, 0] - train_batch_90d[:, :-k, :,
+                                                                                            1]
+            train_batch_disp_45d[:, :, k:, k + param.disp] = train_batch_45d[:, :, k:, 0] - train_batch_45d[:, :, :-k,
+                                                                                            1]
+            train_batch_disp_m45d[:, :, k:, k + param.disp] = train_batch_m45d[:, :, k:, 0] - train_batch_m45d[:, :,
+                                                                                              :-k, 1]
+        elif k == 0:
+            train_batch_disp_0d[:, :, :, k + param.disp] = train_batch_0d[:, :, :, 0] - train_batch_0d[:, :, :, 1]
+            train_batch_disp_90d[:, :, :, k + param.disp] = train_batch_90d[:, :, :, 0] - train_batch_90d[:, :, :, 1]
+            train_batch_disp_45d[:, :, :, k + param.disp] = train_batch_45d[:, :, :, 0] - train_batch_45d[:, :, :, 1]
+            train_batch_disp_m45d[:, :, :, k + param.disp] = train_batch_m45d[:, :, :, 0] - train_batch_m45d[:, :, :, 1]
+
+    return train_batch_disp_0d, train_batch_disp_90d, train_batch_disp_45d, train_batch_disp_m45d
 
 
 def generate_train_data(raw_data_90d,raw_data_0d, raw_data_45d, raw_data_m45d, raw_label):
@@ -184,7 +240,48 @@ def generate_train_data(raw_data_90d,raw_data_0d, raw_data_45d, raw_data_m45d, r
     train_batch_m45d = np.transpose(train_batch_m45d, (3, 0, 1, 2)) / 255
     train_batch_label = np.transpose(train_batch_label, (2, 0, 1))
 
+    # train_batch_disp_0d, train_batch_disp_90d, train_batch_disp_45d, train_batch_disp_m45d = \
+    #     build_cost_volume(train_batch_0d, train_batch_90d, train_batch_45d, train_batch_m45d)
+    """
+    # TODO: 构架cost volume
+    '''
+    0d  -> 4 40      90d -> 76 40
+    45d -> 36 40    m45d -> 44 40
+    '''
+    train_batch_disp_0d = np.zeros((param.batch_size, param.input_size, param.input_size, param.disp * 2 + 1), dtype=np.float32)
+    train_batch_disp_90d = np.zeros((param.batch_size, param.input_size, param.input_size, param.disp * 2 + 1), dtype=np.float32)
+    train_batch_disp_45d = np.zeros((param.batch_size, param.input_size, param.input_size, param.disp * 2 + 1), dtype=np.float32)
+    train_batch_disp_m45d = np.zeros((param.batch_size, param.input_size, param.input_size, param.disp * 2 + 1), dtype=np.float32)
+
+    # #测试图像分割
+    # vis1 = np.zeros(shape=(param.input_size, param.input_size, 1), dtype=np.float32)
+    # vis2 = np.zeros(shape=(param.input_size, param.input_size, 1), dtype=np.float32)
+    # vis1[:-15, :, 0] = train_batch_0d[0, :-15, :, 0]
+    # vis2[:, :, 0] = train_batch_0d[0, :, :, 0]
+    # imageio.imwrite(r'1.jpg', vis1)
+    # imageio.imwrite(r'2.jpg', vis2)
+
+    # 先Hight后width
+    for k in range(-param.disp, param.disp+1):
+        if k < 0:
+            train_batch_disp_0d[:, :k, :, k + param.disp] = train_batch_0d[:, :k, :, 0] - train_batch_0d[:, -k:, :, 1]
+            train_batch_disp_90d[:, :k, :, k + param.disp] = train_batch_90d[:, :k, :, 0] - train_batch_90d[:, -k:, :, 1]
+            train_batch_disp_45d[:, :, :k, k + param.disp] = train_batch_45d[:, :, :k, 0] - train_batch_45d[:, :, -k:, 1]
+            train_batch_disp_m45d[:, :, :k, k + param.disp] = train_batch_m45d[:, :, :k, 0] - train_batch_m45d[:, :, -k:, 1]
+        elif k > 0:
+            train_batch_disp_0d[:, k:, :, k + param.disp] = train_batch_0d[:, k:, :, 0] - train_batch_0d[:, :-k, :, 1]
+            train_batch_disp_90d[:, k:, :, k + param.disp] = train_batch_90d[:, k:, :, 0] - train_batch_90d[:, :-k, :, 1]
+            train_batch_disp_45d[:, :, k:, k + param.disp] = train_batch_45d[:, :, k:, 0] - train_batch_45d[:, :, :-k, 1]
+            train_batch_disp_m45d[:, :, k:, k + param.disp] = train_batch_m45d[:, :, k:, 0] - train_batch_m45d[:, :, :-k, 1]
+        elif k == 0:
+            train_batch_disp_0d[:, :, :, k + param.disp] = train_batch_0d[:, :, :, 0] - train_batch_0d[:, :, :, 1]
+            train_batch_disp_90d[:, :, :, k + param.disp] = train_batch_90d[:, :, :, 0] - train_batch_90d[:, :, :, 1]
+            train_batch_disp_45d[:, :, :, k + param.disp] = train_batch_45d[:, :, :, 0] - train_batch_45d[:, :, :, 1]
+            train_batch_disp_m45d[:, :, :, k + param.disp] = train_batch_m45d[:, :, :, 0] - train_batch_m45d[:, :, :, 1]
+    """
+
     return train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label
+    # return train_batch_disp_90d, train_batch_disp_0d, train_batch_disp_45d, train_batch_disp_m45d, train_batch_label
 
 
 def aug_operation(train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label):
@@ -199,13 +296,10 @@ def aug_operation(train_batch_90d, train_batch_0d, train_batch_45d, train_batch_
         rotation_or_transp_rand = np.random.randint(0, 5)
 
         if rotation_or_transp_rand == 4:
-            train_batch_90d_tmp6 = np.copy(
-                np.transpose(np.squeeze(train_batch_90d[batch_i, :, :, :]), (1, 0, 2)))
+            train_batch_90d_tmp6 = np.copy(np.transpose(np.squeeze(train_batch_90d[batch_i, :, :, :]), (1, 0, 2)))
             train_batch_0d_tmp6 = np.copy(np.transpose(np.squeeze(train_batch_0d[batch_i, :, :, :]), (1, 0, 2)))
-            train_batch_45d_tmp6 = np.copy(
-                np.transpose(np.squeeze(train_batch_45d[batch_i, :, :, :]), (1, 0, 2)))
-            train_batch_m45d_tmp6 = np.copy(
-                np.transpose(np.squeeze(train_batch_m45d[batch_i, :, :, :]), (1, 0, 2)))
+            train_batch_45d_tmp6 = np.copy(np.transpose(np.squeeze(train_batch_45d[batch_i, :, :, :]), (1, 0, 2)))
+            train_batch_m45d_tmp6 = np.copy(np.transpose(np.squeeze(train_batch_m45d[batch_i, :, :, :]), (1, 0, 2)))
 
             train_batch_0d[batch_i, :, :, :] = np.copy(train_batch_90d_tmp6[:, :, ::-1])
             train_batch_90d[batch_i, :, :, :] = np.copy(train_batch_0d_tmp6[:, :, ::-1])

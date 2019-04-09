@@ -7,6 +7,8 @@ from mycnn.epimodel import get_model
 import re
 import time
 import utils
+from keras.backend.tensorflow_backend import set_session
+import tensorflow as tf
 
 
 import threading
@@ -48,20 +50,23 @@ def epi_generator(raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_la
         # print("COST TIME: %f(s)" % (time.time() - t0))
 
         # 数据增强
-        train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = aug_operation(
-            train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)
+        # train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = aug_operation(
+        #     train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)
 
-        yield (
-        [train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d], train_batch_label[:, :, :, np.newaxis])
+        # cost volume
+        train_batch_disp_0d, train_batch_disp_90d, train_batch_disp_45d, train_batch_disp_m45d = \
+            build_cost_volume(train_batch_0d, train_batch_90d, train_batch_45d, train_batch_m45d)
+
+        # yield (
+        # [train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d], train_batch_label[:, :, :, np.newaxis])
+        yield ([train_batch_disp_90d, train_batch_disp_0d, train_batch_disp_45d, train_batch_disp_m45d],
+                    train_batch_label[:, :, :, np.newaxis])
 
 
 if __name__ == '__main__':
     # GPU setting
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
-    from keras.backend.tensorflow_backend import set_session
-    import tensorflow as tf
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     set_session(tf.Session(config=config))
@@ -74,10 +79,16 @@ if __name__ == '__main__':
 
     # define 2 model for training and validation
     # 写死了9x9的图？
+    # model = get_model(param.model_filter_nums, param.model_conv_depth, param.model_learning_rate,
+    #                   input_shape=(param.input_size, param.input_size, param.each_row_pic_num))
+    # model_512 = get_model(param.model_filter_nums, param.model_conv_depth, param.model_learning_rate,
+    #                       input_shape=(param.input_img_size, param.input_img_size, param.each_row_pic_num))
+
     model = get_model(param.model_filter_nums, param.model_conv_depth, param.model_learning_rate,
-                      input_shape=(param.input_size, param.input_size, param.each_row_pic_num))
+                      input_shape=(param.input_size, param.input_size, param.disp * 2 + 1))
+    model.summary()
     model_512 = get_model(param.model_filter_nums, param.model_conv_depth, param.model_learning_rate,
-                          input_shape=(param.input_img_size, param.input_img_size, param.each_row_pic_num))
+                          input_shape=(param.input_img_size, param.input_img_size, param.disp * 2 + 1))
 
     initial_epoch = 0
     best_result = 100.0  # best result for past training
@@ -101,6 +112,7 @@ if __name__ == '__main__':
 
 
     # 512x512x3x9 -> 512x512x9
+    # 后面加了差异图转换cost volume √
     train512_data_90d, train512_data_0d, train512_data_45d, train512_data_m45d = stack_data(raw_data_90d, raw_data_0d,
                                                                                             raw_data_45d, raw_data_m45d)
 

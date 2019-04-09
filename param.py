@@ -20,7 +20,7 @@ param.output_size = param.input_size - 22
 param.model_conv_depth = 7
 param.model_filter_nums = 70
 param.model_learning_rate = 1e-4
-param.steps_per_epoch = 1000
+param.steps_per_epoch = 4000
 param.worker_num = 2 # ???
 
 # param.idx_90d = [76, 67, 58, 49, 40, 31, 22, 13, 4]  # 垂直方向
@@ -68,7 +68,7 @@ param.trainset_dirs = [
 ]
 
 # for output
-param.logfile_dir = 'out_cost/' + param.model_name + '_train.txt'
-param.iter_dir = 'out_cost/'+param.model_name +'/iteration/'
-param.checkpoint_dir = 'out_cost/'+param.model_name +'/checkpoints/'
-param.prediction_dir = 'out_cost/'+param.model_name +'/prediction/'
+param.logfile_dir = 'out_cost_aug/' + param.model_name + '_train.txt'
+param.iter_dir = 'out_cost_aug/'+param.model_name +'/iteration/'
+param.checkpoint_dir = 'out_cost_aug/'+param.model_name +'/checkpoints/'
+param.prediction_dir = 'out_cost_aug/'+param.model_name +'/prediction/'

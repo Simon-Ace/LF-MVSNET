@@ -49,9 +49,13 @@ def epi_generator(raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_la
             raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_label)
         # print("COST TIME: %f(s)" % (time.time() - t0))
 
-        # 数据增强
+        # # 数据增强
         # train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = aug_operation(
         #     train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)
+
+        # 数据增强
+        train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = mycost_aug_operation(
+            train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)
 
         # cost volume
         train_batch_disp_0d, train_batch_disp_90d, train_batch_disp_45d, train_batch_disp_m45d = \

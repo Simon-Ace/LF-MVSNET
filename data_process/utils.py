@@ -356,6 +356,60 @@ def aug_operation(train_batch_90d, train_batch_0d, train_batch_45d, train_batch_
     return train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label
 
 
+def mycost_aug_operation(train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label):
+    for batch_i in range(param.batch_size):
+        gray_rand = 0.4 * np.random.rand() + 0.8
+
+        train_batch_90d[batch_i, :, :, :] = pow(train_batch_90d[batch_i, :, :, :], gray_rand)
+        train_batch_0d[batch_i, :, :, :] = pow(train_batch_0d[batch_i, :, :, :], gray_rand)
+        train_batch_45d[batch_i, :, :, :] = pow(train_batch_45d[batch_i, :, :, :], gray_rand)
+        train_batch_m45d[batch_i, :, :, :] = pow(train_batch_m45d[batch_i, :, :, :], gray_rand)
+
+        rotation_or_transp_rand = np.random.randint(0, 5)
+
+        if rotation_or_transp_rand == 4:
+            # 沿对角线翻折
+            train_batch_45d[batch_i, :, :, :] = np.copy(np.transpose(np.squeeze(train_batch_90d[batch_i, :, :, :]), (1, 0, 2)))
+            train_batch_m45d[batch_i, :, :, :] = np.copy(np.transpose(np.squeeze(train_batch_0d[batch_i, :, :, :]), (1, 0, 2)))
+            train_batch_90d[batch_i, :, :, :] = np.copy(np.transpose(np.squeeze(train_batch_45d[batch_i, :, :, :]), (1, 0, 2)))
+            train_batch_0d[batch_i, :, :, :] = np.copy(np.transpose(np.squeeze(train_batch_m45d[batch_i, :, :, :]), (1, 0, 2)))
+
+            train_batch_label[batch_i, :, :] = np.copy(
+                np.transpose(train_batch_label[batch_i, :, :], (1, 0)))
+
+        if (rotation_or_transp_rand == 1):  # 90d
+            #
+            train_batch_m45d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_90d[batch_i, :, :, :], 1, (0, 1)))
+            train_batch_45d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_0d[batch_i, :, :, :], 1, (0, 1)))
+            train_batch_90d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_45d[batch_i, :, :, :], 1, (0, 1)))
+            train_batch_0d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_m45d[batch_i, :, :, :], 1, (0, 1)))
+
+            train_batch_label[batch_i, :, :] = np.copy(
+                np.rot90(train_batch_label[batch_i, :, :], 1, (0, 1)))
+
+        if (rotation_or_transp_rand == 2):  # 180d
+            # 同一个方向上两个输入流交换位置
+            train_batch_0d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_90d[batch_i, :, :, :], 2, (0, 1)))
+            train_batch_90d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_0d[batch_i, :, :, :], 2, (0, 1)))
+            train_batch_m45d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_45d[batch_i, :, :, :], 2, (0, 1)))
+            train_batch_45d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_m45d[batch_i, :, :, :], 2, (0, 1)))
+
+            train_batch_label[batch_i, :, :] = np.copy(
+                np.rot90(train_batch_label[batch_i, :, :], 2, (0, 1)))
+
+        if (rotation_or_transp_rand == 3):  # 270d
+
+            train_batch_45d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_90d[batch_i, :, :, :], 3, (0, 1)))
+            train_batch_m45d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_0d[batch_i, :, :, :], 3, (0, 1)))
+            train_batch_0d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_45d[batch_i, :, :, :], 3, (0, 1)))
+            train_batch_90d[batch_i, :, :, :] = np.copy(np.rot90(train_batch_m45d[batch_i, :, :, :], 3, (0, 1)))
+
+            train_batch_label[batch_i, :, :] = np.copy(
+                np.rot90(train_batch_label[batch_i, :, :], 3, (0, 1)))
+
+    return train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label
+
+
 if __name__ == '__main__':
     raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_label = read_data(param.trainset_dirs, param.idx_90d,
                                                                                   param.idx_0d, param.idx_45d,
@@ -363,3 +417,7 @@ if __name__ == '__main__':
 
     train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = generate_train_data(
         raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_label)
+
+    # 数据增强
+    train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = mycost_aug_operation(
+        train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)

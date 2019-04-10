@@ -70,7 +70,7 @@ def epi_generator(raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_la
 if __name__ == '__main__':
     # GPU setting
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     set_session(tf.Session(config=config))

@@ -16,7 +16,7 @@ subdirs = os.listdir(LF_test_dir)
 # load model
 # model = get_model(input_shape=(512, 512, 9), filters_count=70, conv_depth=7, learning_rate=1e-4)
 # model = get_model(input_shape=(512, 512, param.each_row_pic_num), filters_count=70, conv_depth=7, learning_rate=1e-4)
-model = get_model(input_shape=(512, 512, param.disp * 2 + 1), filters_count=70, conv_depth=7, learning_rate=1e-4)
+model = get_model(input_shape=(512, 512, param.disp * 2 + 1), filters_count=70, conv_depth=7, learning_rate=1e-4, is_train=False)
 
 # load the latest weights
 ckps = os.listdir(param.checkpoint_dir)

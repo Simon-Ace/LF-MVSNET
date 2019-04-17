@@ -12,14 +12,14 @@ LF_test_dir = '/home/dell/User/shuo/dataset/HCI4D/training/'
 param = type('',(object,),{})
 
 param.model_name = 'epinet'
-param.is_continue = True   # True means you can load the lastest checkpoint to continue training
+param.is_continue = False   # True means you can load the lastest checkpoint to continue training
 
 param.batch_size = 16
-param.input_size = 50 #23+2 # ？？？？
+param.input_size = 64 #23+2 # ？？？？
 param.output_size = param.input_size - 22
 param.model_conv_depth = 7
 param.model_filter_nums = 70
-param.model_learning_rate = 5e-5
+param.model_learning_rate = 1e-4
 param.steps_per_epoch = 4000
 param.worker_num = 2 # ???
 
@@ -68,7 +68,7 @@ param.trainset_dirs = [
 ]
 
 # for output
-param.logfile_dir = 'out_cost_aug/' + param.model_name + '_train.txt'
-param.iter_dir = 'out_cost_aug/'+param.model_name +'/iteration/'
-param.checkpoint_dir = 'out_cost_aug/'+param.model_name +'/checkpoints/'
-param.prediction_dir = 'out_cost_aug/'+param.model_name +'/prediction/'
+param.logfile_dir = 'out_cost_argmin_1/' + param.model_name + '_train.txt'
+param.iter_dir = 'out_cost_argmin_1/'+param.model_name +'/iteration/'
+param.checkpoint_dir = 'out_cost_argmin_1/'+param.model_name +'/checkpoints/'
+param.prediction_dir = 'out_cost_argmin_1/'+param.model_name +'/prediction/'

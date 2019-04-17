@@ -53,9 +53,9 @@ def epi_generator(raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_la
         # train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = aug_operation(
         #     train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)
 
-        # 数据增强
-        train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = mycost_aug_operation(
-            train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)
+        # 数据增强（用这个！）
+        # train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label = mycost_aug_operation(
+        #     train_batch_90d, train_batch_0d, train_batch_45d, train_batch_m45d, train_batch_label)
 
         # cost volume
         train_batch_disp_0d, train_batch_disp_90d, train_batch_disp_45d, train_batch_disp_m45d = \
@@ -70,7 +70,7 @@ def epi_generator(raw_data_90d, raw_data_0d, raw_data_45d, raw_data_m45d, raw_la
 if __name__ == '__main__':
     # GPU setting
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     set_session(tf.Session(config=config))
@@ -89,10 +89,10 @@ if __name__ == '__main__':
     #                       input_shape=(param.input_img_size, param.input_img_size, param.each_row_pic_num))
 
     model = get_model(param.model_filter_nums, param.model_conv_depth, param.model_learning_rate,
-                      input_shape=(param.input_size, param.input_size, param.disp * 2 + 1))
+                      input_shape=(param.input_size, param.input_size, param.disp * 2 + 1), is_train=True)
     model.summary()
     model_512 = get_model(param.model_filter_nums, param.model_conv_depth, param.model_learning_rate,
-                          input_shape=(param.input_img_size, param.input_img_size, param.disp * 2 + 1))
+                          input_shape=(param.input_img_size, param.input_img_size, param.disp * 2 + 1), is_train=False)
 
     initial_epoch = 0
     best_result = 100.0  # best result for past training

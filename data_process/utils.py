@@ -117,9 +117,9 @@ def random_resized_crop(w_start, h_start, scale, scence_id, data):
              h_start + scale * pad:h_start + scale * pad + scale * param.output_size:scale, scence_id]
     return croped / scale
 
-# TODO: 构建的时候要加shape
+
 def build_cost_volume(train_batch_0d, train_batch_90d, train_batch_45d, train_batch_m45d):
-    # TODO: 构架cost volume
+    # 构建cost volume
     '''
     0d  -> 4 40      90d -> 76 40
     45d -> 36 40    m45d -> 44 40
@@ -164,6 +164,8 @@ def build_cost_volume(train_batch_0d, train_batch_90d, train_batch_45d, train_ba
             train_batch_disp_90d[:, :, :, k + param.disp] = train_batch_90d[:, :, :, 0] - train_batch_90d[:, :, :, 1]
             train_batch_disp_45d[:, :, :, k + param.disp] = train_batch_45d[:, :, :, 0] - train_batch_45d[:, :, :, 1]
             train_batch_disp_m45d[:, :, :, k + param.disp] = train_batch_m45d[:, :, :, 0] - train_batch_m45d[:, :, :, 1]
+
+    # TODO 这里是否需要将cost都转化为正数？
 
     return train_batch_disp_0d, train_batch_disp_90d, train_batch_disp_45d, train_batch_disp_m45d
 
